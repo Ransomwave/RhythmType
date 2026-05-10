@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://bwdnr0g0uyiw6"]
+
+[ext_resource type="Script" uid="uid://bqerjwbrhkxhm" path="res://scenes/song-play/song_play.gd" id="1_4swn8"]
+[ext_resource type="Texture2D" uid="uid://burj4yjnttox5" path="res://icon.svg" id="2_gbeim"]
+[ext_resource type="Texture2D" uid="uid://bnlupyse3hwpl" path="res://textures/gameplay/bottom-shadow.png" id="3_i242c"]
+
+[sub_resource type="VideoStreamTheora" id="VideoStreamTheora_4swn8"]
+
+[sub_resource type="SystemFont" id="SystemFont_i242c"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_kw2fk"]
+font = SubResource("SystemFont_i242c")
+font_size = 30
+font_color = Color(0.9672933, 0.1439667, 0, 1)
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 0
+shadow_color = Color(0, 0, 0, 0.3372549)
+
+[node name="SongPlay" type="Node" unique_id=1231286641]
+script = ExtResource("1_4swn8")
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="." unique_id=2026700369]
+volume_db = -10.0
+
+[node name="BackgroundContainer" type="Node" parent="." unique_id=1312744506]
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="BackgroundContainer" unique_id=84164162]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = SubResource("VideoStreamTheora_4swn8")
+
+[node name="TextureRect" type="TextureRect" parent="BackgroundContainer" unique_id=1767557379]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_gbeim")
+stretch_mode = 6
+
+[node name="Gameplay" type="Node" parent="." unique_id=1273988304]
+
+[node name="Shadow" type="TextureRect" parent="Gameplay" unique_id=617541485]
+modulate = Color(1, 1, 1, 0.64705884)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_i242c")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LyricsLine" type="Control" parent="." unique_id=1314054281]
+z_index = 1
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LyricsLine" unique_id=1109635696]
+layout_mode = 0
+offset_left = 118.0
+offset_top = 495.0
+offset_right = 820.0
+offset_bottom = 571.0
+
+[node name="Label" type="Label" parent="." unique_id=1665316193]
+offset_left = 54.0
+offset_top = 363.0
+offset_right = 191.0
+offset_bottom = 427.0
+text = "Late!"
+label_settings = SubResource("LabelSettings_kw2fk")
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="JudgementLine" type="ColorRect" parent="." unique_id=449085273]
+offset_left = 115.0
+offset_top = 434.0
+offset_right = 124.0
+offset_bottom = 649.0
+scale = Vector2(0.4764929, 1)
+color = Color(0.2697293, 0.79629314, 0.3447167, 1)
+
+[node name="LetterTemplate" type="RichTextLabel" parent="." unique_id=1644331055]
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 38.0
+offset_bottom = 80.0
+theme_override_font_sizes/normal_font_size = 55
+text = "a
+"
+fit_content = true
+autowrap_mode = 0
+vertical_alignment = 1
