@@ -6,6 +6,12 @@
 
 [sub_resource type="VideoStreamTheora" id="VideoStreamTheora_4swn8"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_lrtja"]
+font_size = 46
+
+[sub_resource type="LabelSettings" id="LabelSettings_i242c"]
+font_size = 34
+
 [sub_resource type="SystemFont" id="SystemFont_i242c"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_kw2fk"]
@@ -54,21 +60,42 @@ texture = ExtResource("3_i242c")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="LyricsLine" type="Control" parent="." unique_id=1314054281]
+[node name="ScoreVContainer" type="VBoxContainer" parent="Gameplay" unique_id=408843898]
+offset_left = 929.0
+offset_top = 9.0
+offset_right = 1138.0
+offset_bottom = 124.0
+
+[node name="ScoreLabel" type="Label" parent="Gameplay/ScoreVContainer" unique_id=163032186]
+layout_mode = 2
+text = "1,000,000"
+label_settings = SubResource("LabelSettings_lrtja")
+
+[node name="AccuracyLabel" type="Label" parent="Gameplay/ScoreVContainer" unique_id=1496897940]
+layout_mode = 2
+text = "100.00%"
+label_settings = SubResource("LabelSettings_i242c")
+horizontal_alignment = 2
+
+[node name="LyricsLine" type="Control" parent="Gameplay" unique_id=1314054281]
 z_index = 1
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -216.0
+grow_horizontal = 2
+grow_vertical = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="LyricsLine" unique_id=1109635696]
+[node name="LyricsHContainer" type="HBoxContainer" parent="Gameplay/LyricsLine" unique_id=1109635696]
 layout_mode = 0
-offset_left = 118.0
-offset_top = 495.0
-offset_right = 820.0
-offset_bottom = 571.0
+offset_left = 123.0
+offset_top = 67.0
+offset_right = 1151.0
+offset_bottom = 143.0
 
-[node name="Label" type="Label" parent="." unique_id=1665316193]
+[node name="JudgeLabel" type="Label" parent="Gameplay" unique_id=1665316193]
 offset_left = 54.0
 offset_top = 363.0
 offset_right = 191.0
@@ -77,9 +104,8 @@ text = "Late!"
 label_settings = SubResource("LabelSettings_kw2fk")
 horizontal_alignment = 1
 vertical_alignment = 1
-clip_text = true
 
-[node name="JudgementLine" type="ColorRect" parent="." unique_id=449085273]
+[node name="JudgeLine" type="ColorRect" parent="Gameplay" unique_id=449085273]
 offset_left = 115.0
 offset_top = 434.0
 offset_right = 124.0
@@ -88,10 +114,10 @@ scale = Vector2(0.4764929, 1)
 color = Color(0.2697293, 0.79629314, 0.3447167, 1)
 
 [node name="LetterTemplate" type="RichTextLabel" parent="." unique_id=1644331055]
-offset_left = 6.0
-offset_top = 4.0
-offset_right = 38.0
-offset_bottom = 80.0
+offset_left = 8.0
+offset_top = 221.0
+offset_right = 40.0
+offset_bottom = 297.0
 theme_override_font_sizes/normal_font_size = 55
 text = "a
 "
