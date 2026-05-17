@@ -139,7 +139,7 @@ func parse_chart(chart: Dictionary) -> Array[Dictionary]:
 			"start_index": parsed["start_index"]
 		})
 
-		# Build key targets based on the parsed data
+		# Build glyph key targets based on the parsed data
 		for target_index in parsed["targets"]:
 			var glyph_index = parsed["start_index"] + target_index
 			key_targets.append({
@@ -170,6 +170,7 @@ func create_lyric_letters(entries: Array[Dictionary]) -> void:
 				print("Letter '%s' is a target!" % letter)
 				new_letter_node.add_theme_color_override("default_color", Color.from_rgba8(80, 80, 80))
 
+# After all letters are created, we can calculate the offsets for each word based on the position of their first letter
 func build_word_offsets() -> void:
 	word_offsets.clear()
 	for entry in chart_entries:

@@ -119,8 +119,6 @@ offset_top = 221.0
 offset_right = 40.0
 offset_bottom = 297.0
 theme_override_font_sizes/normal_font_size = 55
-text = "a
-"
 fit_content = true
 autowrap_mode = 0
 vertical_alignment = 1
