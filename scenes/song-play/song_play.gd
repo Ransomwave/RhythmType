@@ -11,11 +11,13 @@ extends Node
 @onready var judge_x = judgement_line.position.x
 
 var music_to_load := load("res://maps/reddit_recap/song.mp3")
+# var music_to_load := load("res://maps/want_you_gone/song.mp3")
 
 # Simulated chart data for testing purposes
 # var file_lyrics := {
 # 	5.2: "[W]ell ",
-# 	5.86: " here we [a]re again. ",
+# 	5.86: " here we [a]re again",
+# 	6.3: " [a]re again. ",
 # 	8.4: " It's always [s][u]ch a pleasure. ",
 # 	10.2: " [R]emember [w]hen you ",
 # 	11.4: " [t]ried to kill me twi",
@@ -142,7 +144,8 @@ func parse_chart(chart: Dictionary) -> Array[Dictionary]:
 			var glyph_index = parsed["start_index"] + target_index
 			key_targets.append({
 				"time": float(t),
-				"glyph_index": glyph_index
+				"glyph_index": glyph_index,
+				"word_index": result.size() - 1,
 			})
 
 	return result
@@ -165,7 +168,7 @@ func create_lyric_letters(entries: Array[Dictionary]) -> void:
 
 			if letterIdx in targets:
 				print("Letter '%s' is a target!" % letter)
-				new_letter_node.add_theme_color_override("default_color", Color(0, 1, 0)) # Highlight target letters
+				new_letter_node.add_theme_color_override("default_color", Color.from_rgba8(80, 80, 80))
 
 func build_word_offsets() -> void:
 	word_offsets.clear()
@@ -184,32 +187,31 @@ enum JudgeResult {
 	NONE
 }
 
-func judge_key_press(target: Dictionary, song_time: float) -> JudgeResult:
+func judge_key_press(event: InputEvent, target: Dictionary, song_time: float) -> JudgeResult:
+	if not (event is InputEventKey):
+		return JudgeResult.NONE
+
 	var expected_char: String = glyphs[target["glyph_index"]]["char"]
 	var expected_keycode := OS.find_keycode_from_string(expected_char)
 
 	var char_time: float = target["time"]
+	var word_index: int = target["word_index"]
+	var word_text: String = chart_entries[word_index]["text"]
+	var extra_time: float = word_text.length() * Constants.LETTER_EXTRA_TIME
 
-	# Add extra time based on the length of the current lyric line to make it more forgiving for longer lines
-	var current_word := chart_entries[current_word_index]
-	var extra_time: float = current_word["text"].length() * Constants.LETTER_EXTRA_TIME
-
-	var start_window = char_time - Constants.PRESS_MARGIN_START
+	var start_window: float = char_time - Constants.PRESS_MARGIN_START
 	var end_window: float = char_time + extra_time + Constants.PRESS_MARGIN_END
-
-	if not Input.is_anything_pressed():
-		return JudgeResult.NONE
-
-	if not Input.is_key_pressed(expected_keycode):
-		print("Expected key '%s' (code %d) is not pressed at time %.2f" % [expected_char, expected_keycode, song_time])
-		return JudgeResult.WRONG_KEY
 
 	if song_time < start_window:
 		return JudgeResult.TOO_EARLY
-	elif song_time > end_window:
+	if song_time > end_window:
 		return JudgeResult.TOO_LATE
-	else:
-		return JudgeResult.HIT
+
+	# We are in the timing window; now decide hit vs wrong key
+	if event.keycode != expected_keycode:
+		return JudgeResult.WRONG_KEY
+		
+	return JudgeResult.HIT
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -218,6 +220,7 @@ func _ready() -> void:
 	chart_entries = parse_chart(file_lyrics)
 	create_lyric_letters(chart_entries)
 	call_deferred("build_word_offsets")
+	# build_word_offsets()
 
 	audio_player.stream = music_to_load
 	audio_player.play()
@@ -248,14 +251,24 @@ func _process(_delta: float) -> void:
 	lyric_container.position.x = judge_x - offset
 
 	####### Update next_target_index based on song time
-	if next_target_index < key_targets.size():
-		var next_target_time: float = key_targets[next_target_index]["time"]
-		if song_time > next_target_time + Constants.PRESS_MARGIN_END:
-			judge_label.text = "MISSED!"
-			print("Missed target for glyph '%s' at time %.2f (current song time: %.2f)" % [glyphs[key_targets[next_target_index]["glyph_index"]]["char"], next_target_time, song_time])
-			next_target_index += 1
+	if next_target_index >= key_targets.size():
+		return
 
-	# print("Current word: '%s' (targets at %s), song time: %.2f, offset: %.2f" % [current_word["text"], str(current_word["targets"]), song_time, offset])
+	var current_target := key_targets[next_target_index]
+
+	var next_target_time: float = current_target["time"]
+	var word_text: String = chart_entries[current_target["word_index"]]["text"]
+	var extra_time: float = word_text.length() * Constants.LETTER_EXTRA_TIME
+
+	# We consider a target missed if we have passed the end of its timing window
+	var target_end_window = current_target["time"] + extra_time + Constants.PRESS_MARGIN_END
+
+	if song_time > target_end_window:
+		var current_char_label: RichTextLabel = lyric_container.get_child(key_targets[next_target_index]["glyph_index"])
+		print("Missed target for glyph '%s' at time %.2f (current song time: %.2f)" % [glyphs[key_targets[next_target_index]["glyph_index"]]["char"], next_target_time, song_time])
+		judge_label.text = "MISSED!"
+		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
 
 
 func _input(event: InputEvent) -> void:
@@ -268,23 +281,27 @@ func _input(event: InputEvent) -> void:
 		return
 
 	var target := key_targets[next_target_index]
-	var input_result := judge_key_press(target, song_time)
+	var input_result := judge_key_press(event, target, song_time)
+
+	var current_char_label: RichTextLabel = lyric_container.get_child(target["glyph_index"])
 
 	if input_result == JudgeResult.HIT:
-		judge_label.text = "HIT!"
 		print("HIT target for glyph '%s' at time %.2f!" % [glyphs[target["glyph_index"]]["char"], song_time])
+		judge_label.text = "PERFECT!"
 		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0)) # Change color to indicate hit
 	elif input_result == JudgeResult.TOO_EARLY:
-		judge_label.text = "TOO EARLY!"
 		print("TOO_EARLY for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
-		# next_target_index += 1
-	elif input_result == JudgeResult.TOO_LATE:
-		judge_label.text = "TOO LATE!"
-		print("TOO_LATE for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
+		judge_label.text = "TOO EARLY!"
 		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
+	elif input_result == JudgeResult.TOO_LATE:
+		print("TOO_LATE for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
+		judge_label.text = "TOO LATE!"
+		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
 	elif input_result == JudgeResult.WRONG_KEY:
+		print("WRONG_KEY for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
 		judge_label.text = "WRONG KEY!"
-		# Only print wrong key if we're within the timing window, otherwise it can be spammy
-		var char_time: float = target["time"]
-		if abs(song_time - char_time) <= Constants.PRESS_MARGIN_END:
-			print("WRONG_KEY for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
+		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
