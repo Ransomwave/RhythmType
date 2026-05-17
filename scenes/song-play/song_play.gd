@@ -143,7 +143,7 @@ func parse_chart(chart: Dictionary) -> Array[Dictionary]:
 		for target_index in parsed["targets"]:
 			var glyph_index = parsed["start_index"] + target_index
 			key_targets.append({
-				"time": float(t),
+				"time": float(t) + target_index * Constants.LETTER_EXTRA_TIME, # Stagger targets based on their position in the word
 				"glyph_index": glyph_index,
 				"word_index": result.size() - 1,
 			})
@@ -196,12 +196,11 @@ func judge_key_press(event: InputEvent, target: Dictionary, song_time: float) ->
 	var expected_keycode := OS.find_keycode_from_string(expected_char)
 
 	var char_time: float = target["time"]
-	var word_index: int = target["word_index"]
-	var word_text: String = chart_entries[word_index]["text"]
-	var extra_time: float = word_text.length() * Constants.LETTER_EXTRA_TIME
+	# var word_index: int = target["word_index"]
+	# var word_text: String = chart_entries[word_index]["text"]
 
 	var start_window: float = char_time - Constants.PRESS_MARGIN_START
-	var end_window: float = char_time + extra_time + Constants.PRESS_MARGIN_END
+	var end_window: float = char_time + Constants.PRESS_MARGIN_END
 
 	if song_time < start_window:
 		return JudgeResult.TOO_EARLY
@@ -258,11 +257,10 @@ func _process(_delta: float) -> void:
 	var current_target := key_targets[next_target_index]
 
 	var next_target_time: float = current_target["time"]
-	var word_text: String = chart_entries[current_target["word_index"]]["text"]
-	var extra_time: float = word_text.length() * Constants.LETTER_EXTRA_TIME
+	# var word_text: String = chart_entries[current_target["word_index"]]["text"]
 
 	# We consider a target missed if we have passed the end of its timing window
-	var target_end_window = current_target["time"] + extra_time + Constants.PRESS_MARGIN_END
+	var target_end_window = current_target["time"] + Constants.PRESS_MARGIN_END
 
 	if song_time > target_end_window:
 		var current_char_label: RichTextLabel = lyric_container.get_child(key_targets[next_target_index]["glyph_index"])
