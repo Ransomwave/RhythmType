@@ -11,6 +11,7 @@ extends Node
 @onready var judge_x = judgement_line.position.x
 
 var music_to_load := load("res://maps/reddit_recap/song.mp3")
+var judgement: Judgement
 # var music_to_load := load("res://maps/want_you_gone/song.mp3")
 
 # Simulated chart data for testing purposes
@@ -154,6 +155,7 @@ func _ready() -> void:
 	chart_entries = chart_parser.parse_chart(file_lyrics)
 	glyphs = chart_parser.glyphs
 	key_targets = chart_parser.key_targets
+	judgement = Judgement.new(glyphs)
 	create_lyric_letters(chart_entries)
 
 	call_deferred("build_word_offsets")
@@ -205,7 +207,6 @@ func _process(_delta: float) -> void:
 		next_target_index += 1
 		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
 
-var judgement = Judgement.new(glyphs)
 func _input(event: InputEvent) -> void:
 	if not event.is_pressed() or event is InputEventMouse:
 		return
@@ -220,22 +221,27 @@ func _input(event: InputEvent) -> void:
 
 	var current_char_label: RichTextLabel = lyric_container.get_child(target["glyph_index"])
 
-	if input_result == JudgeResult.HIT:
-		print("HIT target for glyph '%s' at time %.2f!" % [glyphs[target["glyph_index"]]["char"], song_time])
+	if input_result == Judgement.JudgeResult.PERFECT:
+		print("PERFECT hit for glyph '%s' at time %.2f!" % [glyphs[target["glyph_index"]]["char"], song_time])
 		judge_label.text = "PERFECT!"
 		next_target_index += 1
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0)) # Change color to indicate hit
-	elif input_result == JudgeResult.TOO_EARLY:
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0))
+	elif input_result == Judgement.JudgeResult.TOO_EARLY:
 		print("TOO_EARLY for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
 		judge_label.text = "TOO EARLY!"
 		next_target_index += 1
 		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
-	elif input_result == JudgeResult.TOO_LATE:
+	elif input_result == Judgement.JudgeResult.TOO_LATE:
 		print("TOO_LATE for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
 		judge_label.text = "TOO LATE!"
 		next_target_index += 1
 		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
-	elif input_result == JudgeResult.WRONG_KEY:
+	elif input_result == Judgement.JudgeResult.MISS:
+		print("MISS for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
+		judge_label.text = "MISSED!"
+		next_target_index += 1
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+	elif input_result == Judgement.JudgeResult.WRONG_KEY:
 		print("WRONG_KEY for glyph '%s' at time %.2f" % [glyphs[target["glyph_index"]]["char"], song_time])
 		judge_label.text = "WRONG KEY!"
 		next_target_index += 1

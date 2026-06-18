@@ -1,8 +1,9 @@
 class_name Judgement
 
 enum JudgeResult {
+	MISS,
 	TOO_EARLY,
-	HIT,
+	PERFECT,
 	TOO_LATE,
 	WRONG_KEY,
 	NONE
@@ -21,18 +22,17 @@ func judge_key_press(event: InputEvent, target: Dictionary, song_time: float) ->
 	var expected_keycode := OS.find_keycode_from_string(expected_char)
 
 	var char_time: float = target["time"]
-	# var word_index: int = target["word_index"]
-	# var word_text: String = chart_entries[word_index]["text"]
-
-	var start_window: float = char_time - Constants.PRESS_MARGIN_START
-	var end_window: float = char_time + Constants.PRESS_MARGIN_END
+	var offset: float = song_time - char_time
+	var start_window: float = - Constants.PRESS_MARGIN_START
+	var end_window: float = Constants.PRESS_MARGIN_END
 
 	if event.keycode != expected_keycode:
 		return JudgeResult.WRONG_KEY
 
-	if song_time < start_window:
+	if offset < start_window or offset > end_window:
+		return JudgeResult.MISS
+	if abs(offset) <= Constants.PERFECT_MARGIN:
+		return JudgeResult.PERFECT
+	if offset < 0:
 		return JudgeResult.TOO_EARLY
-	if song_time > end_window:
-		return JudgeResult.TOO_LATE
-		
-	return JudgeResult.HIT
+	return JudgeResult.TOO_LATE
