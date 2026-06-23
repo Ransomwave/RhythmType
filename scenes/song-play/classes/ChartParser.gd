@@ -111,8 +111,8 @@ func parse_chunk(word: String) -> ParseChunkResult:
 	return result
 
 ## Parse the raw chart data into a structured format
-func parse_chart(chart: Dictionary[float, String]) -> Array[Dictionary]:
-	var result: Array = []
+func parse_chart(chart: Dictionary[float, String]) -> Array[ParseChartResult]:
+	var result: Array[ParseChartResult] = []
 	var times := chart.keys()
 	times.sort()
 
