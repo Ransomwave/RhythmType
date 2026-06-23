@@ -1,3 +1,4 @@
+extends Node
 class_name Judgement
 
 enum JudgeResult {
@@ -9,22 +10,22 @@ enum JudgeResult {
 	NONE
 }
 
-var glyphs: Array[Dictionary] = []
+var glyphs: Array[ChartParser.Glyph] = []
 
-func _init(glyphs_array: Array[Dictionary]) -> void:
+func _init(glyphs_array: Array[ChartParser.Glyph]) -> void:
 	glyphs = glyphs_array
 
-func judge_key_press(event: InputEvent, target: Dictionary, song_time: float) -> JudgeResult:
+func judge_key_press(event: InputEvent, target: ChartParser.KeyTarget, song_time: float) -> JudgeResult:
 	if not (event is InputEventKey):
 		return JudgeResult.NONE
 
-	var expected_char: String = glyphs[target["glyph_index"]]["char"]
+	var expected_char := glyphs[target.glyph_index].character
 	var expected_keycode := OS.find_keycode_from_string(expected_char)
 
-	var char_time: float = target["time"]
-	var offset: float = song_time - char_time
-	var start_window: float = - Constants.PRESS_MARGIN_START
-	var end_window: float = Constants.PRESS_MARGIN_END
+	var char_time := target.time
+	var offset := song_time - char_time
+	var start_window := -Constants.PRESS_MARGIN_START
+	var end_window := Constants.PRESS_MARGIN_END
 
 	if event.keycode != expected_keycode:
 		return JudgeResult.WRONG_KEY

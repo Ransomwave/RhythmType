@@ -1,15 +1,20 @@
 class_name ChartParser
 
-## [b]character[/b]: The character of the glyph.[br]
-## [b]global_index[/b]: The index of the glyph in the final displayed text (after removing brackets). This is used to calculate the position of the glyph for key press timing and visual feedback[br]
-## [b]word_index[/b]: The index of the word in the chart entries.[br]
-## [b]local_index[/b]: The index of the character within the original word (including brackets).[br]
-## [b]is_target[/b]: Whether the glyph is a key press target.[br]
+## Represents a single character in the song.
 class Glyph:
+	## The character for the glyph 
 	var character: String
+
+	## The index of the glyph in the final displayed text (after removing brackets). This is used to calculate the position of the glyph for key press timing and visual feedback
 	var global_index: int
+
+	## The index of the word in the chart entries.
 	var word_index: int
+
+	## The index of the character within the original word (including brackets).
 	var local_index: int
+
+	## Whether the glyph is a key press target.
 	var is_target: bool
 
 	func _init(p_char: String, p_global_index: int, p_word_index: int, p_local_index: int, p_is_target: bool) -> void:
@@ -19,12 +24,15 @@ class Glyph:
 		local_index = p_local_index
 		is_target = p_is_target
 		
-## [b]time[/b]: The time in seconds when this key press should be hit.[br]
-## [b]glyph_index[/b]: The index of the glyph in the final displayed text (after removing brackets). This is used to calculate the position of the glyph for key press timing and visual feedback[br]
-## [b]word_index[/b]: The index of the word in the chart entries.[br]
+## Represents a single key press target in the song.
 class KeyTarget:
+	## The time in seconds when this key press should be hit.
 	var time: float
+
+	## The index of the glyph in the final displayed text (after removing brackets). This is used to calculate the position of the glyph for key press timing and visual feedback
 	var glyph_index: int
+
+	## The index of the word in the chart entries.
 	var word_index: int
 
 	func _init(p_time: float, p_glyph_index: int, p_word_index: int) -> void:
@@ -32,27 +40,29 @@ class KeyTarget:
 		glyph_index = p_glyph_index
 		word_index = p_word_index
 
-## Parsed chunk result[br]
-## This is a temporary class to store the parsed data for each word.[br]
-## [b]text[/b]: The text of the word (without brackets).[br]
-## [b]targets[/b]: An array of indices indicating which characters in the word are key press targets (indices are relative to the final displayed text, after removing brackets).[br]
-## [b]start_index[/b]: The index in the final displayed text where this word starts (the index of the first character of this word in the final text).[br]
+## Represents a parsed chunk of text. This is used to store the parsed data for each word in the chart.
 class ParseChunkResult:
+	## The text of the word (without brackets).
 	var text: String
+
+	## An array of indices indicating which characters in the word are key press targets (indices are relative to the final displayed text, after removing brackets).
 	var targets: Array[int]
+
+	## The index in the final displayed text where this word starts (the index of the first character of this word in the final text).
 	var start_index: int
 
-
-## Parse chart result[br]
-## This is a temporary class to store the parsed data for each lyric line.[br]
-## [b]time[/b]: The time in seconds when this lyric line should be hit.[br]
-## [b]text[/b]: The text of the lyric line, with brackets removed.[br]
-## [b]targets[/b]: An array of indices indicating which characters in the text are key press targets (indices are relative to the final displayed text, after removing brackets).[br]
-## [b]start_index[/b]: The index in the final displayed text where this lyric line starts (the index of the first character of this line in the final text). This is used to calculate the position of the lyric line for key press timing and visual feedback
+## Represents the data for a single lyric line. Used as a return type for the parse_chart method.
 class ParseChartResult:
+	## The time in seconds when this lyric line should be hit.
 	var time: float
+	
+	## The text of the lyric line, with brackets removed.
 	var text: String
+	
+	## An array of indices indicating which characters in the text are key press targets (indices are relative to the final displayed text, after removing brackets).
 	var targets: Array[int]
+	
+	## The index in the final displayed text where this lyric line starts (the index of the first character of this line in the final text). This is used to calculate the position of the lyric line for key press timing and visual feedback
 	var start_index: int
 
 	func _init(p_time: float, p_text: String, p_targets: Array[int], p_start_index: int) -> void:
