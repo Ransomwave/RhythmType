@@ -3,19 +3,20 @@
 [ext_resource type="Script" uid="uid://c3yb26hq3r6n5" path="res://scenes/song-play/main.gd" id="1_i242c"]
 [ext_resource type="Texture2D" uid="uid://burj4yjnttox5" path="res://icon.svg" id="2_gbeim"]
 [ext_resource type="Texture2D" uid="uid://bnlupyse3hwpl" path="res://textures/gameplay/bottom-shadow.png" id="3_i242c"]
+[ext_resource type="FontFile" uid="uid://bjh8jdna0apib" path="res://fonts/arialroundedmtbold.ttf" id="4_kw2fk"]
 
 [sub_resource type="VideoStreamTheora" id="VideoStreamTheora_4swn8"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_lrtja"]
+font = ExtResource("4_kw2fk")
 font_size = 46
 
 [sub_resource type="LabelSettings" id="LabelSettings_i242c"]
+font = ExtResource("4_kw2fk")
 font_size = 34
 
-[sub_resource type="SystemFont" id="SystemFont_i242c"]
-
 [sub_resource type="LabelSettings" id="LabelSettings_kw2fk"]
-font = SubResource("SystemFont_i242c")
+font = ExtResource("4_kw2fk")
 font_size = 30
 font_color = Color(0.9672933, 0.1439667, 0, 1)
 outline_color = Color(0, 0, 0, 1)
@@ -31,6 +32,7 @@ volume_db = -10.0
 [node name="BackgroundContainer" type="Node" parent="." unique_id=1312744506]
 
 [node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="BackgroundContainer" unique_id=84164162]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -119,6 +121,7 @@ offset_left = 8.0
 offset_top = 221.0
 offset_right = 40.0
 offset_bottom = 297.0
+theme_override_fonts/normal_font = ExtResource("4_kw2fk")
 theme_override_font_sizes/normal_font_size = 55
 autowrap_mode = 0
 vertical_alignment = 1

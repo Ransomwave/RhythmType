@@ -80,6 +80,9 @@ var glyphs: Array[Glyph] = []
 ## Key targets is a list of dictionaries with the time of the lyric and the corresponding glyph index in the final text that should be hit at that time.
 var key_targets: Array[KeyTarget] = []
 
+## Captures each word's first letter position after layout
+static var word_offsets: Array[float] = []
+
 func parse_chunk(word: String) -> ParseChunkResult:
 	var result := ParseChunkResult.new()
 	result.text = ""
@@ -121,7 +124,7 @@ func parse_chunk(word: String) -> ParseChunkResult:
 	return result
 
 ## Parse the raw chart data into a structured format
-func parse_chart(chart: Dictionary[float, String]) -> Array[ParseChartResult]:
+func parse_chart(chart: Dictionary) -> Array[ParseChartResult]:
 	var result: Array[ParseChartResult] = []
 	var times := chart.keys()
 	times.sort()
