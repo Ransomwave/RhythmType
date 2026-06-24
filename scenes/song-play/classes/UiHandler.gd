@@ -7,6 +7,9 @@ var lyric_font: Font
 var judge_line: ColorRect
 var judge_label: Label
 var judge_x: float
+var judge_label_base_position: Vector2
+var judge_label_base_modulate: Color
+var judge_label_tween: Tween
 
 var word_offsets: Array[float] = []
 
@@ -26,6 +29,8 @@ func _init(
 	
 	lyric_font = lyric_letter.get_theme_font("font")
 	judge_x = judge_line.position.x
+	judge_label_base_position = judge_label.position
+	judge_label_base_modulate = judge_label.modulate
 
 func connect_listeners():
 	SongPlayer.judgement.on_judgement.connect(self.on_judgement)
@@ -80,24 +85,41 @@ func position_letters(song_time: float, chart_entries: Array[ChartParser.ParseCh
 	var offset: float = lerp(current_offset, next_offset, t)
 	lyric_container.position.x = judge_x - offset
 
+func animate_judge_label() -> void:
+	if is_instance_valid(judge_label_tween):
+		judge_label_tween.kill()
+
+	judge_label.position = judge_label_base_position
+	judge_label.modulate = Color(judge_label_base_modulate.r, judge_label_base_modulate.g, judge_label_base_modulate.b, 1.0)
+
+	judge_label_tween = judge_label.create_tween()
+	judge_label_tween.set_trans(Tween.TRANS_SINE)
+	judge_label_tween.set_ease(Tween.EASE_OUT)
+	judge_label_tween.tween_property(judge_label, "position", judge_label_base_position + Vector2(0, -10), 0.12)
+	judge_label_tween.tween_property(judge_label, "modulate", Color(judge_label_base_modulate.r, judge_label_base_modulate.g, judge_label_base_modulate.b, 0.0), 0.18)
+
+
 func on_judgement(input_result: Judgement.JudgeResult, event: InputEvent, target: ChartParser.KeyTarget, song_time: float) -> void:
 	print("Received judgement: %s for glyph index %d at time %.2f" % [str(input_result), target.glyph_index, target.time])
 
 	var current_char_label: RichTextLabel = lyric_container.get_child(target.glyph_index)
 
-	if input_result == Judgement.JudgeResult.PERFECT:
-		judge_label.text = "PERFECT!"
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0))
-	elif input_result == Judgement.JudgeResult.TOO_EARLY:
-		judge_label.text = "TOO EARLY!"
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
-	elif input_result == Judgement.JudgeResult.TOO_LATE:
-		judge_label.text = "TOO LATE!"
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
-	elif input_result == Judgement.JudgeResult.MISS:
-		judge_label.text = "MISSED!"
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
-	elif input_result == Judgement.JudgeResult.WRONG_KEY:
-		judge_label.text = "WRONG KEY!"
-		current_char_label.text = "%s" % OS.get_keycode_string(event.keycode).to_lower() # Show the wrong key pressed
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+	match input_result:
+		Judgement.JudgeResult.PERFECT:
+			judge_label.text = "PERFECT!"
+			current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0))
+		Judgement.JudgeResult.TOO_EARLY:
+			judge_label.text = "TOO EARLY!"
+			current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
+		Judgement.JudgeResult.TOO_LATE:
+			judge_label.text = "TOO LATE!"
+			current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
+		Judgement.JudgeResult.MISS:
+			judge_label.text = "MISSED!"
+			current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+		Judgement.JudgeResult.WRONG_KEY:
+			judge_label.text = "WRONG KEY!"
+			current_char_label.text = "%s" % OS.get_keycode_string(event.keycode).to_lower() # Show the wrong key pressed
+			current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+
+	animate_judge_label()
