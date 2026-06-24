@@ -10,19 +10,25 @@ var judge_x: float
 
 var word_offsets: Array[float] = []
 
+var judgement: Judgement
+
 func _init(
 	p_lyric_container: HBoxContainer,
 	p_lyric_letter: RichTextLabel,
 	p_judge_line: ColorRect,
-	p_judge_label: Label
+	p_judge_label: Label,
 ) -> void:
 	lyric_container = p_lyric_container
 	lyric_letter = p_lyric_letter
 	judge_line = p_judge_line
 	judge_label = p_judge_label
+
 	
 	lyric_font = lyric_letter.get_theme_font("font")
 	judge_x = judge_line.position.x
+
+func connect_listeners():
+	SongPlayer.judgement.on_judgement.connect(self.on_judgement)
 
 func create_lyric_letters(entries: Array[ChartParser.ParseChartResult]) -> void:
 	for entry in entries:
@@ -73,3 +79,25 @@ func position_letters(song_time: float, chart_entries: Array[ChartParser.ParseCh
 	var t: float = clamp((song_time - current_word.time) / denom, 0.0, 1.0)
 	var offset: float = lerp(current_offset, next_offset, t)
 	lyric_container.position.x = judge_x - offset
+
+func on_judgement(input_result: Judgement.JudgeResult, event: InputEvent, target: ChartParser.KeyTarget, song_time: float) -> void:
+	print("Received judgement: %s for glyph index %d at time %.2f" % [str(input_result), target.glyph_index, target.time])
+
+	var current_char_label: RichTextLabel = lyric_container.get_child(target.glyph_index)
+
+	if input_result == Judgement.JudgeResult.PERFECT:
+		judge_label.text = "PERFECT!"
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0))
+	elif input_result == Judgement.JudgeResult.TOO_EARLY:
+		judge_label.text = "TOO EARLY!"
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
+	elif input_result == Judgement.JudgeResult.TOO_LATE:
+		judge_label.text = "TOO LATE!"
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
+	elif input_result == Judgement.JudgeResult.MISS:
+		judge_label.text = "MISSED!"
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+	elif input_result == Judgement.JudgeResult.WRONG_KEY:
+		judge_label.text = "WRONG KEY!"
+		current_char_label.text = "%s" % OS.get_keycode_string(event.keycode).to_lower() # Show the wrong key pressed
+		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))

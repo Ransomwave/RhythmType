@@ -1,4 +1,3 @@
-extends Node
 class_name Judgement
 
 enum JudgeResult {
@@ -9,6 +8,8 @@ enum JudgeResult {
 	WRONG_KEY,
 	NONE
 }
+
+signal on_judgement(result: JudgeResult, event: InputEvent, target: ChartParser.KeyTarget, song_time: float)
 
 var glyphs: Array[ChartParser.Glyph] = []
 
@@ -28,12 +29,20 @@ func judge_key_press(event: InputEvent, target: ChartParser.KeyTarget, song_time
 	var end_window := Constants.PRESS_MARGIN_END
 
 	if event.keycode != expected_keycode:
+		on_judgement.emit(JudgeResult.WRONG_KEY, event, target, song_time)
 		return JudgeResult.WRONG_KEY
 
 	if offset < start_window or offset > end_window:
+		on_judgement.emit(JudgeResult.MISS, event, target, song_time)
 		return JudgeResult.MISS
+
 	if abs(offset) <= Constants.PERFECT_MARGIN:
+		on_judgement.emit(JudgeResult.PERFECT, event, target, song_time)
 		return JudgeResult.PERFECT
+	
 	if offset < 0:
+		on_judgement.emit(JudgeResult.TOO_EARLY, event, target, song_time)
 		return JudgeResult.TOO_EARLY
+
+	on_judgement.emit(JudgeResult.TOO_LATE, event, target, song_time)
 	return JudgeResult.TOO_LATE

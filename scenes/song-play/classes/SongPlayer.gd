@@ -22,8 +22,8 @@ var key_targets: Array[ChartParser.KeyTarget] = []
 
 ## Chart entries is an array representing each lyric line, with its text, timing, target indices, and the starting index of the first character in the final displayed text.
 var chart_entries: Array[ChartParser.ParseChartResult] = []
-
-var judgement: Judgement
+	
+static var judgement: Judgement
 var ui_handler: UiHandler
 
 ##################### Play-related data
@@ -62,6 +62,7 @@ func _init(
 	judgement = Judgement.new(glyphs)
 
 	ui_handler = UiHandler.new(lyric_container, lyric_letter, judge_line, judge_label)
+	ui_handler.connect_listeners()
 	ui_handler.create_lyric_letters(chart_entries)
 	ui_handler.call_deferred("build_word_offsets", chart_entries)
 
@@ -108,6 +109,9 @@ func _process(_delta: float) -> void:
 		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
 
 func _input(event: InputEvent) -> void:
+	if not is_playing:
+		return
+
 	if not event.is_pressed() or event is InputEventMouse:
 		return
 
@@ -119,31 +123,10 @@ func _input(event: InputEvent) -> void:
 	var target := key_targets[next_target_index]
 	var input_result := judgement.judge_key_press(event, target, song_time)
 
-	var current_char_label: RichTextLabel = lyric_container.get_child(target.glyph_index)
+	if input_result == Judgement.JudgeResult.NONE:
+		return
 
-	if input_result == Judgement.JudgeResult.PERFECT:
-		print("PERFECT hit for glyph '%s' at time %.2f!" % [glyphs[target.glyph_index].character, song_time])
-		judge_label.text = "PERFECT!"
-		next_target_index += 1
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(0, 255, 0))
-	elif input_result == Judgement.JudgeResult.TOO_EARLY:
-		print("TOO_EARLY for glyph '%s' at time %.2f" % [glyphs[target.glyph_index].character, song_time])
-		judge_label.text = "TOO EARLY!"
-		next_target_index += 1
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 255, 0))
-	elif input_result == Judgement.JudgeResult.TOO_LATE:
-		print("TOO_LATE for glyph '%s' at time %.2f" % [glyphs[target.glyph_index].character, song_time])
-		judge_label.text = "TOO LATE!"
-		next_target_index += 1
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 101, 0))
-	elif input_result == Judgement.JudgeResult.MISS:
-		print("MISS for glyph '%s' at time %.2f" % [glyphs[target.glyph_index].character, song_time])
-		judge_label.text = "MISSED!"
-		next_target_index += 1
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
-	elif input_result == Judgement.JudgeResult.WRONG_KEY:
-		print("WRONG_KEY for glyph '%s' at time %.2f" % [glyphs[target.glyph_index].character, song_time])
-		judge_label.text = "WRONG KEY!"
-		next_target_index += 1
-		current_char_label.text = "%s" % OS.get_keycode_string(event.keycode).to_lower() # Show the wrong key pressed
-		current_char_label.add_theme_color_override("default_color", Color.from_rgba8(255, 0, 0))
+	# var current_char_label: RichTextLabel = lyric_container.get_child(target.glyph_index)
+	next_target_index += 1
+
+	print("%s hit for glyph '%s' at time %.2f!" % [Judgement.JudgeResult.find_key(input_result), glyphs[target.glyph_index].character, song_time])
